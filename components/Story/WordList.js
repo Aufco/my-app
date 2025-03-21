@@ -10,7 +10,7 @@ export default function WordList({ title, words, className }) {
             {words.map((word, index) => (
               <span
                 key={index}
-                className="bg-yellow-200 px-2 py-1 rounded text-sm"
+                className="bg-yellow-200 px-2 py-1 rounded text-sm text-gray-800"
               >
                 {word}
               </span>

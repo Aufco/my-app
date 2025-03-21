@@ -9,7 +9,7 @@ export default function HighlightableText({ text, onHighlight }) {
   // Return the text with clickable words
   return (
     <div className="p-4 bg-white rounded shadow">
-      <p className="leading-relaxed">
+      <p className="leading-relaxed text-gray-800">
         {words.map((word, index) => {
           // Remove punctuation for the word to highlight
           const cleanWord = word.replace(/[^\w\sáéíóúüñÁÉÍÓÚÜÑ]/g, '');

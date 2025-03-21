@@ -12,6 +12,7 @@ export default function StoryDisplay() {
   const [isLoading, setIsLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
+  const [isArchiving, setIsArchiving] = useState(false);
 
   // Fetch user's highlighted words on load
   useEffect(() => {
@@ -118,6 +119,26 @@ export default function StoryDisplay() {
     }
   };
 
+  // Archive recently highlighted words
+  const archiveHighlights = async () => {
+    setIsArchiving(true);
+    
+    try {
+      const response = await fetch('/api/story/archiveHighlights', {
+        method: 'POST',
+      });
+      
+      if (response.ok) {
+        // Fetch updated words after archiving
+        await fetchWords();
+      }
+    } catch (error) {
+      console.error('Error archiving highlights:', error);
+    } finally {
+      setIsArchiving(false);
+    }
+  };
+
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
@@ -151,11 +172,36 @@ export default function StoryDisplay() {
         <ComprehensionMeter comprehension={comprehension} />
       )}
       
-      <WordList
-        title="Recently Highlighted Words"
-        words={recentHighlights}
-        className="mt-6"
-      />
+      <div className="mt-6">
+        <div className="flex justify-between items-center mb-2">
+          <h2 className="text-xl font-bold">Recently Highlighted Words</h2>
+          {recentHighlights && recentHighlights.length > 0 && (
+            <button
+              onClick={archiveHighlights}
+              disabled={isArchiving}
+              className="px-3 py-1 bg-amber-500 text-white rounded hover:bg-amber-600 disabled:bg-amber-300 text-sm"
+            >
+              {isArchiving ? 'Moving...' : 'Move to Previously Highlighted'}
+            </button>
+          )}
+        </div>
+        {recentHighlights && recentHighlights.length > 0 ? (
+          <div className="bg-white p-4 rounded shadow">
+            <div className="flex flex-wrap gap-2">
+              {recentHighlights.map((word, index) => (
+                <span
+                  key={index}
+                  className="bg-yellow-200 px-2 py-1 rounded text-sm text-gray-800"
+                >
+                  {word}
+                </span>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <p className="text-gray-500">No words highlighted yet.</p>
+        )}
+      </div>
       
       <WordList
         title="Previously Highlighted Words"
