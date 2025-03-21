@@ -5,7 +5,7 @@ export default function Header({ user, onLogout }) {
     <header className="bg-blue-600 text-white">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
         <Link href="/" className="text-xl font-bold">
-          Spanish Stories
+          Language Learning Stories
         </Link>
         
         <div>

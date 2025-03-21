@@ -38,7 +38,7 @@ export default function Dashboard() {
     return (
       <Layout>
         <div className="flex justify-center items-center h-64">
-          <p>Loading...</p>
+          <p className="text-gray-700">Loading...</p>
         </div>
       </Layout>
     );
@@ -51,8 +51,8 @@ export default function Dashboard() {
   return (
     <Layout user={user}>
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-center mb-8">
-          Your Spanish Stories
+        <h1 className="text-3xl font-bold text-center mb-8 text-gray-800">
+          Your Stories
         </h1>
         
         <StoryDisplay />

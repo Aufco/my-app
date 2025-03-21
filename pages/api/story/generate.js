@@ -2,6 +2,7 @@ import { getIronSession } from 'iron-session';
 import { sessionOptions } from '../../../lib/utils/auth';
 import { generateSimpleStory } from '../../../lib/api/openai';
 import storiesDb from '../../../lib/db/stories';
+import usersDb from '../../../lib/db/users';
 
 export default async function handler(req, res) {
   // Get session
@@ -17,8 +18,18 @@ export default async function handler(req, res) {
   }
 
   try {
+    // Get the user's language preference
+    const { selectedLanguage } = req.body || {};
+    
+    // If no language is provided in the request, get it from the database
+    let language = selectedLanguage;
+    if (!language) {
+      const preferences = usersDb.getLanguagePreferences(session.user.id);
+      language = preferences.selectedLanguage;
+    }
+    
     // Generate a new story
-    const story = await generateSimpleStory();
+    const story = await generateSimpleStory(language);
     
     // Save the story to the database
     const savedStory = storiesDb.save(session.user.id, story);

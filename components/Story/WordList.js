@@ -3,7 +3,7 @@ import React from 'react';
 export default function WordList({ title, words, className }) {
   return (
     <div className={className}>
-      <h2 className="text-xl font-bold mb-2">{title}</h2>
+      <h2 className="text-xl font-bold mb-2 text-gray-800">{title}</h2>
       {words && words.length > 0 ? (
         <div className="bg-white p-4 rounded shadow">
           <div className="flex flex-wrap gap-2">

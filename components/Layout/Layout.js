@@ -23,8 +23,8 @@ export default function Layout({ children, user }) {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Head>
-        <title>Spanish Stories</title>
-        <meta name="description" content="Adaptive AI-Generated Spanish Stories" />
+        <title>Language Learning Stories</title>
+        <meta name="description" content="Adaptive AI-Generated Language Learning Stories" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
@@ -36,7 +36,7 @@ export default function Layout({ children, user }) {
 
       <footer className="bg-gray-800 text-white py-4">
         <div className="container mx-auto px-4 text-center">
-          <p>Adaptive AI-Generated Spanish Stories - Local App</p>
+          <p>Adaptive AI-Generated Language Learning Stories - Local App</p>
         </div>
       </footer>
     </div>

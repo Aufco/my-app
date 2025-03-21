@@ -4,20 +4,36 @@ import WordList from './WordList';
 import ComprehensionMeter from './ComprehensionMeter';
 import { calculateComprehension } from '../../lib/utils/text';
 
+// List of supported languages
+const LANGUAGES = [
+  'Albanian', 'Amharic', 'Arabic', 'Armenian', 'Bengali', 'Bosnian', 'Bulgarian', 'Burmese',
+  'Catalan', 'Chinese', 'Croatian', 'Czech', 'Danish', 'Dutch', 'Estonian', 'Finnish', 
+  'French', 'Georgian', 'German', 'Greek', 'Gujarati', 'Hindi', 'Hungarian', 'Icelandic', 
+  'Indonesian', 'Italian', 'Japanese', 'Kannada', 'Kazakh', 'Korean', 'Latvian', 'Lithuanian',
+  'Macedonian', 'Malay', 'Malayalam', 'Marathi', 'Mongolian', 'Norwegian', 'Persian', 'Polish',
+  'Portuguese', 'Punjabi', 'Romanian', 'Russian', 'Serbian', 'Slovak', 'Slovenian', 'Somali',
+  'Spanish', 'Swahili', 'Swedish', 'Tagalog', 'Tamil', 'Telugu', 'Thai', 'Turkish', 'Ukrainian',
+  'Urdu', 'Vietnamese'
+];
+
 export default function StoryDisplay() {
   const [story, setStory] = useState('');
   const [recentHighlights, setRecentHighlights] = useState([]);
   const [previousHighlights, setPreviousHighlights] = useState([]);
   const [comprehension, setComprehension] = useState(100);
+  const [selectedLanguage, setSelectedLanguage] = useState('Spanish');
+  const [nativeLanguage, setNativeLanguage] = useState('English');
   const [isLoading, setIsLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [isArchiving, setIsArchiving] = useState(false);
+  const [isSavingLanguage, setIsSavingLanguage] = useState(false);
 
   // Fetch user's highlighted words on load
   useEffect(() => {
     fetchWords();
     fetchCurrentStory();
+    fetchLanguagePreferences();
   }, []);
 
   // Update comprehension when story or highlights change
@@ -25,6 +41,48 @@ export default function StoryDisplay() {
     const newComprehension = calculateComprehension(story, recentHighlights);
     setComprehension(newComprehension);
   }, [story, recentHighlights]);
+
+  // Fetch user's language preferences
+  const fetchLanguagePreferences = async () => {
+    try {
+      const response = await fetch('/api/user/preferences');
+      
+      if (response.ok) {
+        const data = await response.json();
+        setSelectedLanguage(data.selectedLanguage || 'Spanish');
+        setNativeLanguage(data.nativeLanguage || 'English');
+      }
+    } catch (error) {
+      console.error('Error fetching language preferences:', error);
+    }
+  };
+
+  // Save user's language preferences
+  const saveLanguagePreferences = async () => {
+    setIsSavingLanguage(true);
+    try {
+      await fetch('/api/user/preferences', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ selectedLanguage, nativeLanguage }),
+      });
+    } catch (error) {
+      console.error('Error saving language preferences:', error);
+    } finally {
+      setIsSavingLanguage(false);
+    }
+  };
+
+  // Handle language selection changes
+  const handleSelectedLanguageChange = (e) => {
+    setSelectedLanguage(e.target.value);
+    saveLanguagePreferences();
+  };
+
+  const handleNativeLanguageChange = (e) => {
+    setNativeLanguage(e.target.value);
+    saveLanguagePreferences();
+  };
 
   // Fetch user's current story
   const fetchCurrentStory = async () => {
@@ -86,11 +144,15 @@ export default function StoryDisplay() {
     try {
       const response = await fetch('/api/story/generate', {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ selectedLanguage }),
       });
       
       if (response.ok) {
         const data = await response.json();
         setStory(data.story);
+        // Clear highlights when generating a new story
+        setRecentHighlights([]);
       }
     } catch (error) {
       console.error('Error generating story:', error);
@@ -106,6 +168,8 @@ export default function StoryDisplay() {
     try {
       const response = await fetch('/api/story/regenerate', {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ selectedLanguage }),
       });
       
       if (response.ok) {
@@ -141,6 +205,32 @@ export default function StoryDisplay() {
 
   return (
     <div>
+      <div className="mb-6">
+        <h2 className="text-xl font-bold text-gray-800 mb-2">Selected Language</h2>
+        <select
+          value={selectedLanguage}
+          onChange={handleSelectedLanguageChange}
+          className="w-full p-2 border border-gray-300 rounded mb-4 text-gray-800 bg-white"
+          disabled={isSavingLanguage}
+        >
+          {LANGUAGES.map((language) => (
+            <option key={language} value={language} className="text-gray-800">{language}</option>
+          ))}
+        </select>
+
+        <h2 className="text-xl font-bold text-gray-800 mb-2">Native Language</h2>
+        <select
+          value={nativeLanguage}
+          onChange={handleNativeLanguageChange}
+          className="w-full p-2 border border-gray-300 rounded mb-4 text-gray-800 bg-white"
+          disabled={isSavingLanguage}
+        >
+          {LANGUAGES.map((language) => (
+            <option key={language} value={language} className="text-gray-800">{language}</option>
+          ))}
+        </select>
+      </div>
+
       <div className="flex justify-between items-center mb-4">
         <button
           onClick={generateStory}
@@ -160,9 +250,14 @@ export default function StoryDisplay() {
       </div>
       
       <div className="mb-6">
-        <h2 className="text-xl font-bold mb-2">Current Story</h2>
+        <h2 className="text-xl font-bold text-gray-800 mb-2">Current Story</h2>
         {story ? (
-          <HighlightableText text={story} onHighlight={handleHighlight} />
+          <HighlightableText 
+            text={story} 
+            onHighlight={handleHighlight}
+            recentHighlights={recentHighlights}
+            previousHighlights={previousHighlights}
+          />
         ) : (
           <p className="text-gray-500">No story generated yet. Click "Generate Story" to start.</p>
         )}
@@ -174,7 +269,7 @@ export default function StoryDisplay() {
       
       <div className="mt-6">
         <div className="flex justify-between items-center mb-2">
-          <h2 className="text-xl font-bold">Recently Highlighted Words</h2>
+          <h2 className="text-xl font-bold text-gray-800">Recently Highlighted Words</h2>
           {recentHighlights && recentHighlights.length > 0 && (
             <button
               onClick={archiveHighlights}

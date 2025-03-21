@@ -11,7 +11,7 @@ export default function ComprehensionMeter({ comprehension }) {
   return (
     <div className="mb-6">
       <div className="flex justify-between items-center mb-2">
-        <h2 className="text-xl font-bold">Comprehension</h2>
+        <h2 className="text-xl font-bold text-gray-800">Comprehension</h2>
         <span className="font-bold">{comprehension}%</span>
       </div>
       
